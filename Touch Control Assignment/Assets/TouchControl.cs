@@ -14,6 +14,8 @@ public class TouchControl : MonoBehaviour
 
     Camera my_camera = new Camera();
     private float drag_distance;
+    private float initial_distance;
+    private Vector3 initial_scale;
 
     // Start is called before the first frame update
     void Start()
@@ -23,81 +25,101 @@ public class TouchControl : MonoBehaviour
         touchDidMove = new bool[10];
     }
 
-    // Update is called once per frames
+    // Update is called once per frame
     void Update()
     {
 
-
-
-        foreach (Touch touch in Input.touches)
+        if (Input.touchCount == 2)
         {
-            int fingerIndex = touch.fingerId;
+            bool A = Input.GetKey(KeyCode.Space);
+            Touch touch1 = Input.touches[0];
+            Touch touch2 = Input.touches[1];
 
-            if (touch.phase == TouchPhase.Began)
+
+            if ((touch1.phase == TouchPhase.Began) || (touch2.phase == TouchPhase.Began))
             {
-                if (currently_selected_item)
-                    drag_distance = Vector3.Distance(currently_selected_item.transform.position, my_camera.transform.position);
-                Debug.Log("Finger #" + fingerIndex.ToString() + " entered!");
-                timeTouchBegan[fingerIndex] = Time.time;
-                touchDidMove[fingerIndex] = false;
-
+               
+                initial_distance = Vector2.Distance(touch1.position, touch2.position);
+                initial_scale = currently_selected_item.transform.localScale;
+                print(initial_scale);
             }
 
-            if (touch.phase == TouchPhase.Moved)
+            if (currently_selected_item)
             {
-                Debug.Log("Finger #" + fingerIndex.ToString() + " moved!");
-                touchDidMove[fingerIndex] = true;
-
-
-                Ray ray = Camera.main.ScreenPointToRay(touch.position);
-                if (currently_selected_item)
-                    currently_selected_item.update_drag_position(ray.GetPoint(drag_distance));
+              
+                currently_selected_item.transform.localScale = (Vector2.Distance(touch1.position, touch2.position) / initial_distance) * initial_scale;
             }
-            if (touch.phase == TouchPhase.Ended)
+        }
+        else
+            foreach (Touch touch in Input.touches)
             {
-                float tapTime = Time.time - timeTouchBegan[fingerIndex];
-                Debug.Log("Finger #" + fingerIndex.ToString() + " left. Tap time: " + tapTime.ToString());
-                if (tapTime <= tapTimeThreshold && touchDidMove[fingerIndex] == false)
+                int fingerIndex = touch.fingerId;
+
+                if (touch.phase == TouchPhase.Began)
                 {
-                    // Select the object
-                    Ray my_ray = my_camera.ScreenPointToRay(touch.position);
-                    Debug.DrawRay(my_ray.origin, 20 * my_ray.direction);
+                    if (currently_selected_item)
+                        drag_distance = Vector3.Distance(currently_selected_item.transform.position, my_camera.transform.position);
+                    Debug.Log("Finger #" + fingerIndex.ToString() + " entered!");
+                    timeTouchBegan[fingerIndex] = Time.time;
+                    touchDidMove[fingerIndex] = false;
 
-                    RaycastHit info_on_hit;
-                    if (Physics.Raycast(my_ray, out info_on_hit))
+                }
+
+                if (touch.phase == TouchPhase.Moved)
+                {
+                    Debug.Log("Finger #" + fingerIndex.ToString() + " moved!");
+                    touchDidMove[fingerIndex] = true;
+
+
+                    Ray ray = Camera.main.ScreenPointToRay(touch.position);
+                    if (currently_selected_item)
+                        currently_selected_item.update_drag_position(ray.GetPoint(drag_distance));
+                }
+                if (touch.phase == TouchPhase.Ended)
+                {
+                    float tapTime = Time.time - timeTouchBegan[fingerIndex];
+                    Debug.Log("Finger #" + fingerIndex.ToString() + " left. Tap time: " + tapTime.ToString());
+                    if (tapTime <= tapTimeThreshold && touchDidMove[fingerIndex] == false)
                     {
-                        Controlable my_obj = info_on_hit.transform.GetComponent<Controlable>();
-                        if (my_obj)
+                        // Select the object
+                        Ray my_ray = my_camera.ScreenPointToRay(touch.position);
+                        Debug.DrawRay(my_ray.origin, 20 * my_ray.direction);
+
+                        RaycastHit info_on_hit;
+                        if (Physics.Raycast(my_ray, out info_on_hit))
+                        {
+                            Controlable my_obj = info_on_hit.transform.GetComponent<Controlable>();
+                            if (my_obj)
+                            {
+                                if (currently_selected_item)
+                                {
+                                    currently_selected_item.deselect();
+                                }
+                                my_obj.select();
+                                currently_selected_item = my_obj;
+
+                            }
+
+
+
+                        }
+                        else
                         {
                             if (currently_selected_item)
                             {
                                 currently_selected_item.deselect();
+                                currently_selected_item = null;
                             }
-                            my_obj.select();
-                            currently_selected_item = my_obj;
-
                         }
 
 
 
+
+
                     }
-                    else
-                    {
-                        if (currently_selected_item)
-                        {
-                            currently_selected_item.deselect();
-                            currently_selected_item = null;
-                        }
-                    }
-
-
-
-
 
                 }
-
             }
-        }
 
 
     }
