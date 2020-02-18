@@ -5,26 +5,29 @@ using UnityEngine.UI;
 
 public class TouchControl : MonoBehaviour
 {
-   
+
     private float[] timeTouchBegan;
     private bool[] touchDidMove;
     private float tapTimeThreshold = .5f;
     Controlable currently_selected_item;
 
+
     Camera my_camera = new Camera();
+    private float drag_distance;
+
     // Start is called before the first frame update
     void Start()
     {
         my_camera = Camera.main;
-         timeTouchBegan = new float[10];
+        timeTouchBegan = new float[10];
         touchDidMove = new bool[10];
     }
 
-    // Update is called once per frame
+    // Update is called once per frames
     void Update()
     {
-       
-        
+
+
 
         foreach (Touch touch in Input.touches)
         {
@@ -32,15 +35,23 @@ public class TouchControl : MonoBehaviour
 
             if (touch.phase == TouchPhase.Began)
             {
+                if (currently_selected_item)
+                    drag_distance = Vector3.Distance(currently_selected_item.transform.position, my_camera.transform.position);
                 Debug.Log("Finger #" + fingerIndex.ToString() + " entered!");
                 timeTouchBegan[fingerIndex] = Time.time;
                 touchDidMove[fingerIndex] = false;
+
             }
 
             if (touch.phase == TouchPhase.Moved)
             {
                 Debug.Log("Finger #" + fingerIndex.ToString() + " moved!");
                 touchDidMove[fingerIndex] = true;
+
+
+                Ray ray = Camera.main.ScreenPointToRay(touch.position);
+                if (currently_selected_item)
+                    currently_selected_item.update_drag_position(ray.GetPoint(drag_distance));
             }
             if (touch.phase == TouchPhase.Ended)
             {
@@ -56,7 +67,7 @@ public class TouchControl : MonoBehaviour
                     if (Physics.Raycast(my_ray, out info_on_hit))
                     {
                         Controlable my_obj = info_on_hit.transform.GetComponent<Controlable>();
-                        if(my_obj)
+                        if (my_obj)
                         {
                             if (currently_selected_item)
                             {
@@ -67,6 +78,8 @@ public class TouchControl : MonoBehaviour
 
                         }
 
+
+
                     }
                     else
                     {
@@ -76,7 +89,13 @@ public class TouchControl : MonoBehaviour
                             currently_selected_item = null;
                         }
                     }
+
+
+
+
+
                 }
+
             }
         }
 
