@@ -43,9 +43,12 @@ public class TouchControl : MonoBehaviour
 
             if ((touch1.phase == TouchPhase.Began) || (touch2.phase == TouchPhase.Began))
             {
+                
                 Vector2 diff = touch2.position - touch1.position;
                 initial_finger_angle = Mathf.Atan2(diff.y, diff.x);
                 initial_object_orientation = currently_selected_item.transform.rotation;
+
+              
                 initial_distance = Vector2.Distance(touch1.position, touch2.position);
                 initial_scale = currently_selected_item.transform.localScale;
                 print(initial_scale);
@@ -57,9 +60,12 @@ public class TouchControl : MonoBehaviour
 
                 float new_finger_angle = Mathf.Atan2(diff.y, diff.x);
                 currently_selected_item.transform.rotation = initial_object_orientation * Quaternion.AngleAxis(Mathf.Rad2Deg * (new_finger_angle - initial_finger_angle), my_camera.transform.forward);
+
                 currently_selected_item.transform.localScale = (Vector2.Distance(touch1.position, touch2.position) / initial_distance) * initial_scale;
             }
 
+            
+            //Camera Scaling
             else if (Input.touchCount == 2 && (Input.GetTouch(0).phase == TouchPhase.Moved || Input.GetTouch(1).phase == TouchPhase.Moved))
             {
                 float distance;
@@ -147,10 +153,6 @@ public class TouchControl : MonoBehaviour
 
     }
 
-    void cameraScaling()
-    {
-   
-    }
-
+    
 
 }
