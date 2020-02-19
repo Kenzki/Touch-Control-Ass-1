@@ -32,7 +32,7 @@ public class TouchControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cameraScaling();
+        
 
         if (Input.touchCount == 2)
         {
@@ -58,6 +58,19 @@ public class TouchControl : MonoBehaviour
                 float new_finger_angle = Mathf.Atan2(diff.y, diff.x);
                 currently_selected_item.transform.rotation = initial_object_orientation * Quaternion.AngleAxis(Mathf.Rad2Deg * (new_finger_angle - initial_finger_angle), my_camera.transform.forward);
                 currently_selected_item.transform.localScale = (Vector2.Distance(touch1.position, touch2.position) / initial_distance) * initial_scale;
+            }
+
+            else if (Input.touchCount == 2 && (Input.GetTouch(0).phase == TouchPhase.Moved || Input.GetTouch(1).phase == TouchPhase.Moved))
+            {
+                float distance;
+                Vector2 touchcam1 = Input.GetTouch(0).position;
+                Vector2 touchcam2 = Input.GetTouch(1).position;
+
+                distance = Vector2.Distance(touchcam1, touchcam2);
+                float pinchAmount = (previousDistance - distance) * scaleSpeed * Time.deltaTime;
+                my_camera.transform.Translate(0, 0, pinchAmount);
+
+                previousDistance = distance;
             }
         }
         else
@@ -136,23 +149,8 @@ public class TouchControl : MonoBehaviour
 
     void cameraScaling()
     {
-        if(Input.touchCount == 2 && (Input.GetTouch(0).phase == TouchPhase.Began || Input.GetTouch(1).phase == TouchPhase.Began))
-        {
-            previousDistance = Vector2.Distance(Input.GetTouch(0).position, Input.GetTouch(1).position);
-
-        }
-
-        else if(Input.touchCount == 2 && (Input.GetTouch(0).phase == TouchPhase.Moved || Input.GetTouch(1).phase == TouchPhase.Moved))
-        {
-            float distance;
-            Vector2 touch1 = Input.GetTouch(0).position;
-            Vector2 touch2 = Input.GetTouch(1).position;
-
-            distance = Vector2.Distance(touch1, touch2);
-            float pinchAmount = (previousDistance - distance) * scaleSpeed * Time.deltaTime;
-            my_camera.transform.Translate(0, 0, pinchAmount);
-
-            previousDistance = distance;
-        }
+   
     }
+
+
 }
