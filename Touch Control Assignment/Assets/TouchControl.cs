@@ -19,7 +19,7 @@ public class TouchControl : MonoBehaviour
     private float initial_distance;
     private Vector3 initial_scale;
     private float previousDistance;
-    private float scaleSpeed = 3f;
+    private float scaleSpeed = 1.2f;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +33,7 @@ public class TouchControl : MonoBehaviour
     void Update()
     {
         
-
+        //selected onject scaling and rotation
         if (Input.touchCount == 2)
         {
             bool A = Input.GetKey(KeyCode.Space);
@@ -73,13 +73,14 @@ public class TouchControl : MonoBehaviour
                 Vector2 touchcam2 = Input.GetTouch(1).position;
 
                 distance = Vector2.Distance(touchcam1, touchcam2);
-                float pinchAmount = (previousDistance - distance) * scaleSpeed * Time.deltaTime;
+                float pinchAmount = (distance - previousDistance) * scaleSpeed * Time.deltaTime;
                 my_camera.transform.Translate(0, 0, pinchAmount);
 
                 previousDistance = distance;
             }
         }
         else
+            //dragging an object
             foreach (Touch touch in Input.touches)
             {
                 int fingerIndex = touch.fingerId;
