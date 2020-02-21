@@ -51,7 +51,7 @@ public class Controlable : MonoBehaviour
 
     internal void select()
     {
-        go_red();
+        go_blue();
     }
 
     internal void deselect()

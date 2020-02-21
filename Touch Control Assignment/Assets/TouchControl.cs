@@ -9,10 +9,10 @@ public class TouchControl : MonoBehaviour
     private float[] timeTouchBegan;
     private bool[] touchDidMove;
     private float tapTimeThreshold = .5f;
-    Controlable currently_selected_item;
+    Controlable currently_selected_object;
 
 
-    Camera my_camera = new Camera();
+    Camera cam = new Camera();
     private float drag_distance;
     private float initial_finger_angle;
     private Quaternion initial_object_orientation;
@@ -24,7 +24,7 @@ public class TouchControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        my_camera = Camera.main;
+        cam = Camera.main;
         timeTouchBegan = new float[10];
         touchDidMove = new bool[10];
     }
@@ -33,7 +33,7 @@ public class TouchControl : MonoBehaviour
     void Update()
     {
         
-        //selected onject scaling and rotation
+        //Scaling and Rotating an object
         if (Input.touchCount == 2)
         {
             bool A = Input.GetKey(KeyCode.Space);
@@ -46,22 +46,22 @@ public class TouchControl : MonoBehaviour
                 
                 Vector2 diff = touch2.position - touch1.position;
                 initial_finger_angle = Mathf.Atan2(diff.y, diff.x);
-                initial_object_orientation = currently_selected_item.transform.rotation;
+                initial_object_orientation = currently_selected_object.transform.rotation;
 
               
                 initial_distance = Vector2.Distance(touch1.position, touch2.position);
-                initial_scale = currently_selected_item.transform.localScale;
+                initial_scale = currently_selected_object.transform.localScale;
                 print(initial_scale);
             }
 
-            if (currently_selected_item)
+            if (currently_selected_object)
             {
                 Vector2 diff = touch2.position - touch1.position;
 
                 float new_finger_angle = Mathf.Atan2(diff.y, diff.x);
-                currently_selected_item.transform.rotation = initial_object_orientation * Quaternion.AngleAxis(Mathf.Rad2Deg * (new_finger_angle - initial_finger_angle), my_camera.transform.forward);
+                currently_selected_object.transform.rotation = initial_object_orientation * Quaternion.AngleAxis(Mathf.Rad2Deg * (new_finger_angle - initial_finger_angle), cam.transform.forward);
 
-                currently_selected_item.transform.localScale = (Vector2.Distance(touch1.position, touch2.position) / initial_distance) * initial_scale;
+                currently_selected_object.transform.localScale = (Vector2.Distance(touch1.position, touch2.position) / initial_distance) * initial_scale;
             }
 
             
@@ -73,8 +73,8 @@ public class TouchControl : MonoBehaviour
                 Vector2 touchcam2 = Input.GetTouch(1).position;
 
                 distance = Vector2.Distance(touchcam1, touchcam2);
-                float pinchAmount = (distance - previousDistance) * scaleSpeed * Time.deltaTime;
-                my_camera.transform.Translate(0, 0, pinchAmount);
+                float zoomAmount = (distance - previousDistance) * scaleSpeed * Time.deltaTime;
+                cam.transform.Translate(0, 0, zoomAmount);
 
                 previousDistance = distance;
             }
@@ -87,8 +87,8 @@ public class TouchControl : MonoBehaviour
 
                 if (touch.phase == TouchPhase.Began)
                 {
-                    if (currently_selected_item)
-                        drag_distance = Vector3.Distance(currently_selected_item.transform.position, my_camera.transform.position);
+                    if (currently_selected_object)
+                        drag_distance = Vector3.Distance(currently_selected_object.transform.position, cam.transform.position);
                     Debug.Log("Finger #" + fingerIndex.ToString() + " entered!");
                     timeTouchBegan[fingerIndex] = Time.time;
                     touchDidMove[fingerIndex] = false;
@@ -102,8 +102,8 @@ public class TouchControl : MonoBehaviour
 
 
                     Ray ray = Camera.main.ScreenPointToRay(touch.position);
-                    if (currently_selected_item)
-                        currently_selected_item.update_drag_position(ray.GetPoint(drag_distance));
+                    if (currently_selected_object)
+                        currently_selected_object.update_drag_position(ray.GetPoint(drag_distance));
                 }
                 if (touch.phase == TouchPhase.Ended)
                 {
@@ -112,7 +112,7 @@ public class TouchControl : MonoBehaviour
                     if (tapTime <= tapTimeThreshold && touchDidMove[fingerIndex] == false)
                     {
                         // Select the object
-                        Ray my_ray = my_camera.ScreenPointToRay(touch.position);
+                        Ray my_ray = cam.ScreenPointToRay(touch.position);
                         Debug.DrawRay(my_ray.origin, 20 * my_ray.direction);
 
                         RaycastHit info_on_hit;
@@ -121,30 +121,24 @@ public class TouchControl : MonoBehaviour
                             Controlable my_obj = info_on_hit.transform.GetComponent<Controlable>();
                             if (my_obj)
                             {
-                                if (currently_selected_item)
+                                if (currently_selected_object)
                                 {
-                                    currently_selected_item.deselect();
+                                    currently_selected_object.deselect();
                                 }
                                 my_obj.select();
-                                currently_selected_item = my_obj;
+                                currently_selected_object = my_obj;
 
                             }
-
-
 
                         }
                         else
                         {
-                            if (currently_selected_item)
+                            if (currently_selected_object)
                             {
-                                currently_selected_item.deselect();
-                                currently_selected_item = null;
+                                currently_selected_object.deselect();
+                                currently_selected_object = null;
                             }
                         }
-
-
-
-
 
                     }
 
