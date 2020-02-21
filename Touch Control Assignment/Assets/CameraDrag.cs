@@ -11,7 +11,9 @@ public class CameraDrag : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //camera drag 
+
+        //https://pressstart.vip/tutorials/2018/11/9/78/perspective-camera-panning.html
+
         if (Input.GetMouseButtonDown(0))
         {
             touchStart = GetWorldPosition(groundZ);

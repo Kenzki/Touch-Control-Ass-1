@@ -16,6 +16,7 @@ public class TouchControl : MonoBehaviour
     private float drag_distance;
     private float initial_finger_angle;
     private Quaternion initial_object_orientation;
+  //private Quaternion initial_camera_orientation;
     private float initial_distance;
     private Vector3 initial_scale;
     private float previousDistance;
@@ -47,11 +48,14 @@ public class TouchControl : MonoBehaviour
                 Vector2 diff = touch2.position - touch1.position;
                 initial_finger_angle = Mathf.Atan2(diff.y, diff.x);
                 initial_object_orientation = currently_selected_object.transform.rotation;
+             // initial_camera_orientation = my_camera.transform.rotation;
 
-              
+
                 initial_distance = Vector2.Distance(touch1.position, touch2.position);
                 initial_scale = currently_selected_object.transform.localScale;
                 print(initial_scale);
+
+
             }
 
             if (currently_selected_object)
@@ -64,7 +68,17 @@ public class TouchControl : MonoBehaviour
                 currently_selected_object.transform.localScale = (Vector2.Distance(touch1.position, touch2.position) / initial_distance) * initial_scale;
             }
 
-            
+
+            //Camera Rotation
+         /*   if (my_camera)
+            {
+                Vector2 diff = touch2.position - touch1.position;
+                float new_finger_angle = Mathf.Atan2(diff.y, diff.x);
+                my_camera.transform.rotation = initial_camera_orientation * Quaternion.AngleAxis(Mathf.Rad2Deg * (new_finger_angle - initial_finger_angle), my_camera.transform.up);
+                
+            }*/
+
+
             //Camera Scaling
             else if (Input.touchCount == 2 && (Input.GetTouch(0).phase == TouchPhase.Moved || Input.GetTouch(1).phase == TouchPhase.Moved))
             {
@@ -78,6 +92,8 @@ public class TouchControl : MonoBehaviour
 
                 previousDistance = distance;
             }
+
+
         }
         else
             //dragging an object
